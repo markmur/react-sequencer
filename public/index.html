@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Wilt</title>
+  </head>
+  <body>
+    <script src="https://www.gstatic.com/firebasejs/3.6.4/firebase.js"></script>
+    <script>
+      // Initialize Firebase
+      var config = {
+        apiKey: "AIzaSyAUkSQiQcyKyWrgiWlnoAQ2PJvhHfYWsIY",
+        authDomain: "sequencer-2dafa.firebaseapp.com",
+        databaseURL: "https://sequencer-2dafa.firebaseio.com",
+        storageBucket: "sequencer-2dafa.appspot.com",
+        messagingSenderId: "275598279998"
+      };
+      firebase.initializeApp(config);
+    </script>
+
+    <div id="sequencer"></div>
+    <script src="/dist/bundle.min.js"></script>
+  </body>
+</html>

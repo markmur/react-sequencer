@@ -44,9 +44,9 @@ module.exports = {
   },
 
   plugins: [
-    new CleanWebpackPlugin(['dist'], {
-      verbose: false,
-      dry: false
+    new CleanWebpackPlugin(['public/dist'], {
+      verbose: true,
+      dry: false,
     }),
     new webpack.optimize.OccurenceOrderPlugin(true),
     new webpack.optimize.DedupePlugin(),

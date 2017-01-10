@@ -7,4 +7,3 @@ bower_components
 .DS_STORE
 .node_history
 *.log
-dist/
