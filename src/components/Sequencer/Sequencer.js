@@ -223,7 +223,7 @@ class Sequencer extends Component {
         </div>
 
         <footer>
-          Made by <a target="_blank" href="https://markmurray.co">Mark Murray</a>
+          Made by <a target="_blank" href="https://markmurray.co">Mark Murray</a>. View the source on <a href="https://github.com/markmur/react-sequencer">Github</a>.
         </footer>
       </div>
     )
