@@ -1,4 +1,4 @@
-# react-sequencer
+# Step Sequencer
 
 React sequencer built with React and the Web Audio API. Hosted with Firebase.
 
