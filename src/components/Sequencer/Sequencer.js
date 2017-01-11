@@ -12,29 +12,48 @@ var getNotesForOctave = function(octave) {
   }, {});
 };
 
+const defaultPads = [
+  [1,0,0,0,0,0,0,0],
+  [0,1,0,0,0,0,0,0],
+  [1,0,0,0,0,0,0,0],
+  [0,0,0,0,1,0,0,0],
+  [1,0,0,0,0,0,0,0],
+  [0,1,0,0,0,0,0,0],
+  [0,0,0,1,0,0,0,0],
+  [0,0,0,0,0,1,0,0]
+];
+
 class Synth {
   constructor() {
     this.ctx = new (window.AudioContext || window.webkitAudioContext)();
   }
 
-  playNotes(notes = [], wave = 'sine') {
-    var vco = this.ctx.createOscillator();
-    vco.type = wave;
-    vco.frequency.value = notes[0];
+  playNotes(notes = [], state = {}) {
+
+    if (!notes.length) return;
+
+    var osc = this.ctx.createOscillator();
+    osc.type = state.type.toLowerCase();
+    osc.frequency.value = notes[0];
+
+    var delay = this.ctx.createDelay();
+        delay.delayTime.value = state.delay ? (state.bpm / 10) / 100 : 0;
 
     /* VCA */
     var vca = this.ctx.createGain();
     vca.gain.value = 1;
 
     /* connections */
-    vco.connect(vca);
+    osc.connect(vca);
+    vca.connect(delay);
     vca.connect(this.ctx.destination);
+    delay.connect(this.ctx.destination);
 
-    vco.start(0);
+    osc.start(0);
 
     setTimeout(() => {
       vca.gain.setTargetAtTime(0, this.ctx.currentTime, 0.015);
-    }, 50);
+    }, state.release);
   }
 }
 
@@ -47,26 +66,38 @@ class Sequencer extends Component {
 
     this.state = {
       type: 'sine',
-      pads: [],
-      bpm: 80,
+      pads: defaultPads,
+      bpm: 140,
+      release: 10,
       step: 0,
       steps: 8,
       playing: false,
-      octave: 4
+      octave: 4,
+      delay: false,
+      notes: getNotesForOctave(4)
     };
   }
 
-  componentWillMount() {
+  changeRelease(release) {
+    this.setState({
+      release
+    }, () => {
+      this.pause();
 
-    var pads = [];
+      if (this.state.playing) this.play();
+    })
+  }
 
-    for (let i = 0; i < this.state.steps; i++) {
-      pads.push([1,0,0,0,0,0,0,0]);
-    }
+  changeBPM(bpm) {
+
+    if (bpm > 300 || bpm < 60) return;
 
     this.setState({
-      pads: pads,
-      notes: getNotesForOctave(this.state.octave)
+      bpm
+    }, () => {
+      this.pause();
+
+      if (this.state.playing) this.play();
     });
   }
 
@@ -93,7 +124,7 @@ class Sequencer extends Component {
 
   play() {
 
-    const { bpm, notes, type } = this.state;
+    const { bpm, notes, type, release, delay } = this.state;
     const notesArray = Object.keys(notes).map(key => notes[key]);
 
     this.setState({
@@ -111,11 +142,16 @@ class Sequencer extends Component {
           pad === 1 ? notesArray[i] : null
         ).filter(x => x);
 
-        synth.playNotes(next, type.toLowerCase());
+        synth.playNotes(next, {
+          release,
+          bpm,
+          type,
+          delay
+        });
 
       });
 
-    }, 200);
+    }, ((60 * 1000) / this.state.bpm) / 2);
   }
 
   pause() {
@@ -166,6 +202,17 @@ class Sequencer extends Component {
             </button>
 
             <div class="select-wrapper">
+              <span>BPM</span>
+              <input
+                type="number"
+                min="80"
+                max="300"
+                step="1"
+                defaultValue={this.state.bpm}
+                onChange={(e) => this.changeBPM(e.target.value)} />
+            </div>
+
+            <div class="select-wrapper">
               <span>Wave</span>
               <select
                 value={this.state.type}
@@ -175,6 +222,7 @@ class Sequencer extends Component {
                 class="wave">
                 <option>Sine</option>
                 <option>Square</option>
+                <option>Sawtooth</option>
                 <option>Triangle</option>
               </select>
             </div>
@@ -186,28 +234,53 @@ class Sequencer extends Component {
                 onChange={(e) => this.changeOctave(e.target.value)}
                 data-label="octave"
                 class="octave">
+                <option>1</option>
                 <option>2</option>
                 <option>3</option>
                 <option>4</option>
                 <option>5</option>
                 <option>6</option>
+                <option>7</option>
               </select>
             </div>
+
+            <div class="select-wrapper">
+              <span>Release</span>
+              <input
+                type="number"
+                min="0"
+                max="400"
+                step="1"
+                defaultValue={this.state.release}
+                onChange={(e) => this.changeRelease(e.target.value)} />
+            </div>
+
+            <button
+              onClick={() => {
+                this.setState({
+                  delay: !this.state.delay
+                }, () => {
+                  this.pause();
+                  if (this.state.playing) this.play();
+                });
+              }}
+              class={classNames({ active: this.state.delay })}>
+              Delay
+            </button>
           </div>
 
           <ul class="notes">
             {Object.keys(notes).slice(0, 8).reverse().map(note =>
-              <li>{note.slice(0, note.length - 1)}</li>
+              <li key={`note-${note}`}>{note.slice(0, note.length - 1)}</li>
             )}
           </ul>
 
           <div class="flex">
           {pads.map((group, groupIndex) =>
-            <div class="pads">
+            <div key={`pad-${groupIndex}`} class="pads">
               {group.map((pad, i) =>
                 <div
-                  data-note={notesArray[i]}
-                  note={notesArray[i]}
+                  key={`pad-group-${i}`}
                   onClick={() => {
                     this.togglePad(groupIndex, i);
                   }}

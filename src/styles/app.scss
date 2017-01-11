@@ -54,7 +54,7 @@ h1 {
   display: flex;
   padding: 0.35em 0 0.5em;
 
-  button, select {
+  button, select, input {
     margin: 5px;
     outline: none;
     background: lighten($dark, 10%);
