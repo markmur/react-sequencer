@@ -169,6 +169,7 @@ class Sequencer extends Component {
 
     var padState = clonedPads[group][pad];
 
+    clonedPads[group] = [0,0,0,0,0,0,0,0];
     clonedPads[group][pad] = padState === 1 ? 0 : 1;
 
     this.setState({
