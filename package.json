@@ -2,6 +2,7 @@
   "name": "react-sequencer",
   "private": false,
   "version": "0.1.0",
+  "homepage": "https://sequencer-2dafa.firebaseapp.com",
   "description": "Step sequencer built with React and the Web Audio API",
   "keywords": [
     "step",
