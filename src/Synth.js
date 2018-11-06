@@ -11,7 +11,7 @@ export default class Synth {
     osc.frequency.value = notes[0]
 
     const delay = this.ctx.createDelay()
-    delay.delayTime.value = state.delay ? state.bpm / 10 / 100 : 0
+    delay.delayTime.value = state.delay ? state.bpm / 2000 : 0
 
     // VCA
     const vca = this.ctx.createGain()

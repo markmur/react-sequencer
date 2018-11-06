@@ -5,25 +5,22 @@ import Synth from './Synth'
 
 import NOTES from './notes'
 
-const getNotesForOctave = octave => {
-  return Object.keys(NOTES).reduce((state, note) => {
-    if (note.split('').pop() === Number(octave)) state[note] = NOTES[note]
+const getNotesForOctave = octave =>
+  Object.keys(NOTES).reduce((state, note) => {
+    if (note.split('').pop() === String(octave)) state[note] = NOTES[note]
     return state
   }, {})
-}
 
 const defaultPads = [
-  [1, 0, 0, 0, 0, 0, 0, 0],
-  [0, 1, 0, 0, 0, 0, 0, 0],
-  [1, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 1, 0, 0, 0],
-  [1, 0, 0, 0, 0, 0, 0, 0],
-  [0, 1, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 1, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0],
   [0, 0, 0, 1, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 1, 0, 0]
+  [0, 0, 0, 0, 0, 1, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 1, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 1, 0]
 ]
-
-const synth = new Synth()
 
 class Sequencer extends Component {
   state = {
@@ -95,12 +92,14 @@ class Sequencer extends Component {
   }
 
   play() {
+    this.synth = new Synth()
+
     const { bpm, notes, type, release, delay } = this.state
     const notesArray = Object.keys(notes).map(key => notes[key])
 
-    this.setState({
+    this.setState(() => ({
       playing: true
-    })
+    }))
 
     this.interval = setInterval(() => {
       this.setState(
@@ -112,7 +111,7 @@ class Sequencer extends Component {
             .map((pad, i) => (pad === 1 ? notesArray[i] : null))
             .filter(x => x)
 
-          synth.playNotes(next, {
+          this.synth.playNotes(next, {
             release,
             bpm,
             type,
@@ -124,10 +123,10 @@ class Sequencer extends Component {
   }
 
   pause() {
-    this.setState({
+    this.setState(() => ({
       playing: false,
       step: 0
-    })
+    }))
 
     clearInterval(this.interval)
   }
